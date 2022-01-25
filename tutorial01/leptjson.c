@@ -1,6 +1,7 @@
 #include "leptjson.h"
 
 #include <assert.h> /* assert() */
+#include <stdio.h>
 #include <stdlib.h> /* NULL */
 
 #define EXPECT(c, ch)         \
@@ -41,11 +42,18 @@ static int lept_parse_value(lept_context *c, lept_value *v) {
 
 int lept_parse(lept_value *v, const char *json) {
   lept_context c;
+  int res;
+
   assert(v != NULL);
   c.json = json;
   v->type = LEPT_NULL;
+
   lept_parse_whitespace(&c);
-  return lept_parse_value(&c, v);
+  res = lept_parse_value(&c, v);
+  if (c.json[0] == ' ' && c.json[1] != '\0') {
+    res = LEPT_PARSE_ROOT_NOT_SINGULAR;
+  }
+  return res;
 }
 
 lept_type lept_get_type(const lept_value *v) {
